@@ -1,8 +1,15 @@
-﻿using Priorita.ProjectManagement;
-using Priorita.Users;
-using Priorita.utility;
-using System.Collections.Generic;
-using System.Xml.Linq;
+﻿//-----------------------------------------------------------------------
+// <copyright file="Program.cs" company="GIBB">
+//      Copyright (c) GIBB. All rights reserved.
+// </copyright>
+// <author>Rahul Gurung</author>
+// <date>2026-01-13</date>
+// <summary>Entry of the Program.</summary>
+//-----------------------------------------------------------------------
+
+using Priorita.projectmanagement;
+using Priorita.users;
+using Priorita.utilities;
 
 namespace Priorita
 {
@@ -20,7 +27,7 @@ namespace Priorita
         private static readonly string defaultProjectName = "New Project";
         private static readonly string defaultTaskTitle = "New Task";
         private static readonly string defaultTaskDescription = "No Description";
-        private static readonly List<User> users = [];
+        private static readonly List<User> users = Toolbox.GetUserList();
         private static int currentUserId = 0;
 
         /// <summary>
@@ -33,23 +40,25 @@ namespace Priorita
         /// <param name="args">An array of command-line arguments supplied to the application. This parameter is not used.</param>
         public static void Main(string[] args)
         {
+            try { 
+            Logger.Log(LogCategory.SYSTEM, "Priorita Project Management Tool started.");
             Printer.PrintHeader("Priorita Project Management Tool");
             Printer.PrintInformation("Create your default user.");
-            User defaultUser = CreateUser();
+            _ = CreateUser();
 
             while (true)
             {
+                User user = users[currentUserId];
                 Printer.ClearConsole();
                 Printer.PrintMenu("Main");
                 int Choice = GetUserIndex();
-
+                
                 switch (Choice)
                 {
                     case 1:
                         CreateTask();
                         break;
                     case 2:
-                        //description and what not - maybe list everything?
                         CreateProject();
                         break;
                     case 3:
@@ -67,12 +76,16 @@ namespace Priorita
                     case 7:
                         ChangeUser();
                         break;
-
-                    case 0:
+                    case 8:
+                        TaskBoardRenderer taskBoard = new(user);
+                        taskBoard.PrintBoard();
+                        break;
+                        case 0:
                         Printer.PrintQuestion("Are you sure you want to exit? (Y/N)");
                         string exitChoice = Console.ReadLine() ?? "N";
                         if (exitChoice.ToUpper() == "Y")
                         {
+                            Logger.Log(LogCategory.SYSTEM, "Application shutting down normally.");
                             Printer.ClearConsole();
                             Printer.PrintInformation("Exiting Priorita. Goodbye!");
                             return;
@@ -82,7 +95,12 @@ namespace Priorita
                         Printer.PrintGeneralError("Invalid choice. Please try again.");
                         break;
                 }
+                }
+            } catch(Exception e) { 
+                Printer.PrintGeneralError($"An unexpected error occurred: {e.Message}");
+
             }
+
         }
         /// <summary>
         /// Reads a line from the console and attempts to parse it as an integer representing a user index.
@@ -179,7 +197,7 @@ namespace Priorita
             };
 
             users[currentUserId].ProjectTasks.Add(task);
-
+            Logger.Log(LogCategory.TASK, $"User '{users[currentUserId].Username}' created task '{taskTitle}'.");
             Printer.PrintInformation($"Task '{taskTitle}' created successfully.");
 
         }
@@ -318,8 +336,10 @@ namespace Priorita
         /// successful creation.</remarks>
         private static void CreateProject()
         {
+            Printer.ClearConsole();
             string projectName = GetProjectName();
-            Project project = new() { Name = projectName };
+            string projectDescription = GetProjectDescription();
+            Project project = new() { Name = projectName, Description = projectDescription };
             users[currentUserId].AddProject(project);
             Printer.PrintInformation($"Project '{projectName}' created successfully.");
         }
@@ -344,6 +364,25 @@ namespace Priorita
             }
         }
 
+        /// <summary>
+        /// Prompts the user to enter a brief description of the project and returns the input.
+        /// </summary>
+        /// <returns>A string containing the project description entered by the user.  Returns "No Description" if the user
+        /// provides no input or only whitespace.</returns>
+        private static string GetProjectDescription()
+        {
+            Printer.PrintQuestion("Provide a brief description of the Project:");
+            string userInput = Console.ReadLine();
+            if (string.IsNullOrWhiteSpace(userInput))
+            {
+                Printer.PrintGeneralError("Project description cannot be empty, defaulting to <No Description>");
+                return "No Description";
+            }
+            else
+            {
+                return userInput;
+            }
+        }
 
         /// <summary>
         /// Creates a new <see cref="User"/> instance using input collected from the user.
@@ -353,11 +392,13 @@ namespace Priorita
         /// <returns>A <see cref="User"/> object initialized with the provided username and password.</returns>
         private static User CreateUser()
         {
+            Printer.ClearConsole();
             string name = GetUsername();
             string password = GetUserPassword();
             User user = new(name, password);
             users.Add(user);
             Printer.PrintSuccess($"User '{name}' created successfully.");
+
             return user;
         }
 
@@ -429,6 +470,7 @@ namespace Priorita
                 if (int.TryParse(input, out int selectedUserId) && selectedUserId >= 0 && selectedUserId < users.Count)
                 {
                     currentUserId = selectedUserId;
+                    Logger.Log(LogCategory.SYSTEM, $"Active user switched to: {users[currentUserId].Username}");
                     Printer.PrintSuccess($"Switched to user: {users[currentUserId].Username}");
                     break;
                 }

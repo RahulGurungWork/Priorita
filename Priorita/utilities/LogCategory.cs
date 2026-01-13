@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="MatrixQuadrant.cs" company="GIBB">
+// <copyright file="LogCategory.cs" company="GIBB">
 //      Copyright (c) GIBB. All rights reserved.
 // </copyright>
 // <author>Rahul Gurung</author>
@@ -7,17 +7,21 @@
 // <summary>Entry of the Program.</summary>
 //-----------------------------------------------------------------------
 
-namespace Priorita.projectmanagement
+
+
+namespace Priorita.utilities
 {
     /// <summary>
-    /// Matrix Quadrants for task prioritization.
+    /// Defines categories for logging messages.
     /// </summary>
-    public enum MatrixQuadrant
+    public enum LogCategory
     {
-        DoFirst,    // Urgent & Important
-        Schedule,   // Not Urgent & Important
-        Delegate,   // Urgent & Not Important
-        Eliminate   // Not Urgent & Not Important
-
-    }
+        INFO,           
+        WARNING,        
+        ERROR,          
+        USERINPUT,   
+        TASK,          
+        PROJECT,     
+        CLUSTER,
+        SYSTEM    }
 }

@@ -1,51 +1,38 @@
-﻿using Priorita.projectmanagement;
-using System.Text.Json;
+﻿//-----------------------------------------------------------------------
+// <copyright file="Project.cs" company="GIBB">
+//      Copyright (c) GIBB. All rights reserved.
+// </copyright>
+// <author>Rahul Gurung</author>
+// <date>2026-01-13</date>
+// <summary>Entry of the Program.</summary>
+//-----------------------------------------------------------------------
 
-namespace Priorita.ProjectManagement
+using Priorita.utilities;
+
+namespace Priorita.projectmanagement
 {
+    /// <summary>
+    /// Project class representing a collection of tasks.
+    /// </summary>
     public class Project
     {
+        /// <summary>
+        /// Default variables for new projects
+        /// </summary>
         public string Name { get; set; } = "New Project";
+        public string Description { get; set; } = "No Description";
         public DateTime StartTime { get; set; } = DateTime.Now;
-        public List<ProjectTask> Tasks { get; set; } = new List<ProjectTask>();
+        public List<ProjectTask> Tasks { get; set; } = [];
 
-        public void ExportTasks(string filePath = "project_export.json")
-        {
-            try
-            {
-                var options = new JsonSerializerOptions { WriteIndented = true };
-                string jsonString = JsonSerializer.Serialize(Tasks, options);
-                File.WriteAllText(filePath, jsonString);
-                Console.WriteLine($"Successfully exported {Tasks.Count} tasks to {filePath}");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Export failed: {ex.Message}");
-            }
-        }
 
+        /// <summary>
+        /// Adds a task to the project and logs the addition.
+        /// </summary>
+        /// <param name="task"></param>
         public void AddTask(ProjectTask task)
         {
             Tasks.Add(task);
-            Console.WriteLine($"Task '{task.Title}' added to project '{Name}'.");
-        }
-
-        public void RemoveTask(ProjectTask task)
-        {
-            bool removed = Tasks.Remove(task);
-
-            if (removed)
-            {
-                Priorita.Utility.Logger.Log("TASK_REMOVE", $"Removed task: {task.Title}");
-            }
-            else
-            {
-                Console.WriteLine($"Task '{task.Title}' could not be found in the list.");
-            }
-        }
-        public List<ProjectTask> GetTasksByQuadrant(MatrixQuadrant quadrant)
-        {
-            return Tasks.Where(task => task.Quadrant == quadrant).ToList();
+            Logger.Log(LogCategory.TASK, $"Task '{task.Title}' added to project '{Name}'.");
         }
     }
 }

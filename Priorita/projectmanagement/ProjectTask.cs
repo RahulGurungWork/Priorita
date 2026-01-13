@@ -1,10 +1,25 @@
-﻿using Priorita.projectmanagement;
+﻿//-----------------------------------------------------------------------
+// <copyright file="ProjectTask.cs" company="GIBB">
+//      Copyright (c) GIBB. All rights reserved.
+// </copyright>
+// <author>Rahul Gurung</author>
+// <date>2026-01-13</date>
+// <summary>Entry of the Program.</summary>
+//-----------------------------------------------------------------------
 
-namespace Priorita.ProjectManagement
+
+namespace Priorita.projectmanagement
 {
+    /// <summary>
+    /// A class representing a task within a project, including its strategic value, deadline, and calculated priority quadrant.
+    /// </summary>
 
     public class ProjectTask
     {
+
+        /// <summary>
+        /// Default Values for some variables for new tasks
+        /// </summary>
         public string Title { get; set; } = "New Task";
         public string Description { get; set; } = "No Description";
 
@@ -18,8 +33,6 @@ namespace Priorita.ProjectManagement
                 return (Deadline - DateTime.Now).Days;
             }
         }
-
-
         public MatrixQuadrant Quadrant
         {
             get
@@ -27,6 +40,11 @@ namespace Priorita.ProjectManagement
                 return CalculateQuadrant();
             }
         }
+
+        /// <summary>
+        /// Calculates the priority quadrant of the task based on its strategic value and time criticality.
+        /// </summary>
+        /// <returns>A Matrix Quadrabt Enum value</returns>
         private MatrixQuadrant CalculateQuadrant()
         { 
             bool isUrgent = TimeCriticality <= 3;
@@ -37,13 +55,20 @@ namespace Priorita.ProjectManagement
             if (isUrgent && !isImportant) return MatrixQuadrant.Delegate;
             return MatrixQuadrant.Eliminate;
         }
-        public void Display()
+        /// <summary>
+        /// Defines a label for each quadrant for easy identification.
+        /// </summary>
+        /// <returns>A string representing a quadrant</returns>
+        public string GetQuadrantLabel()
         {
-            Utility.Logger.Log("TASK_VIEW", $"Displayed task details for: {Title}");
-            Console.WriteLine($"[{Quadrant}] {Title}");
-            Console.WriteLine($"   Due in: {TimeCriticality} days | Value: {StrategicValue}/10");
-            Console.WriteLine($"   Desc: {Description}");
-            Console.WriteLine("---------------------------------------------");
+            return Quadrant switch
+            {
+                MatrixQuadrant.DoFirst => "[!]",
+                MatrixQuadrant.Schedule => "[S]",
+                MatrixQuadrant.Delegate => "[D]",
+                MatrixQuadrant.Eliminate => "[X]",
+                _ => "[?]"
+            };
         }
     }
 }
